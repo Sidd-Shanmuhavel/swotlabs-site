@@ -1,18 +1,127 @@
 @import "tailwindcss";
 
+/* Hallmark · genre: modern-minimal · macrostructure: Split Studio (marketing) ·
+ * theme: custom (vibe: "instrument-panel dark, engineered, restrained" ·
+ * paper oklch(14% 0.012 130) · accent oklch(82% 0.17 130) chromatic-other ·
+ * Space Grotesk + Geist + JetBrains Mono) · enrichment: none · nav: N9 ·
+ * footer: Ft5 · design-system: design.md · designed-as-app
+ * axes: dark / grotesk-sans / chromatic-other
+ * pre-emit critique: P4 H5 E4 S5 R5 V5
+ * contrast: pass (40–41) · slop: pass (42–45) · honest: pass (46)
+ * chrome: pass (47) · tokens: pass (48) · responsive: pass (49)
+ * icons: pass (30) · mobile: pass (34, 49, 50–57)
+ *
+ * Every neutral carries a trace of the anchor hue's chroma. The active anchor is
+ * injected at runtime by src/providers/ThemeProvider.tsx, which rewrites the
+ * whole ramp — not just the accent — so the canvas re-tints with the accent.
+ * Colour tokens therefore stay var()-indirected here; only fonts are inlined.
+ */
+
 @theme {
-  --color-background: #050505;
-  --color-foreground: #f0f0f0;
-  --color-accent: #84cc16;
-  --color-accent-light: #a3e635;
-  --color-accent-soft: rgba(132, 204, 22, 0.16);
-  --color-accent-border: rgba(132, 204, 22, 0.45);
-  --color-muted: #888888;
-  --color-surface: #111111;
-  --color-surface-light: #1a1a1a;
-  --color-border: #222222;
-  --font-sans: var(--font-display), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: var(--font-mono-jb), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  /* Colour ramp — default `lime` anchor, hue 130 */
+  --color-paper: oklch(14% 0.012 130);
+  --color-paper-2: oklch(18% 0.014 130);
+  --color-paper-3: oklch(22% 0.014 130);
+  --color-rule: oklch(30% 0.012 130);
+  --color-neutral: oklch(58% 0.01 130);
+  --color-muted: oklch(74% 0.008 130);
+  --color-ink: oklch(95% 0.008 130);
+  --color-accent: oklch(82% 0.17 130);
+  --color-accent-light: oklch(89% 0.14 130);
+  --color-accent-ink: oklch(16% 0.02 130);
+  --color-focus: oklch(82% 0.17 130);
+
+  /* The one inverted surface: third-party logos ship for light backgrounds.
+     Tinted, never pure white. */
+  --color-panel: oklch(95% 0.006 130);
+  --color-panel-rule: oklch(86% 0.006 130);
+  --color-panel-ink: oklch(16% 0.012 130);
+  --color-panel-muted: oklch(30% 0.01 130);
+
+  /* Danger stays red across every anchor — a status colour, not a brand one. */
+  --color-danger: oklch(70% 0.17 25);
+
+  /* Compatibility aliases — identical values under the pre-redesign names */
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+  --color-surface: var(--color-paper-2);
+  --color-surface-light: var(--color-paper-3);
+  --color-border: var(--color-rule);
+
+  /* Scale — 1.25 major third; display ceiling 84px */
+  --text-xs: 0.8rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.55;
+  --text-base: 1rem;
+  --text-base--line-height: 1.6;
+  --text-md: 1.25rem;
+  --text-md--line-height: 1.55;
+  --text-lg: 1.5625rem;
+  --text-lg--line-height: 1.35;
+  --text-xl: 1.9531rem;
+  --text-xl--line-height: 1.2;
+  --text-2xl: 2.4414rem;
+  --text-2xl--line-height: 1.12;
+  --text-3xl: 3.0518rem;
+  --text-3xl--line-height: 1.06;
+  --text-display: clamp(2.5rem, 4.5vw + 1rem, 5.25rem);
+  --text-display--line-height: 1.04;
+
+  /* Motion — three named easings; never the browser default */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Fonts are inlined: the next/font variables live on <html>, and utilities
+   should carry the stack rather than another layer of indirection. */
+@theme inline {
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+:root {
+  /* Type — 2+1: display, body, one outlier reserved for metadata labels */
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* Space — 4pt scale, named by role */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 9rem;
+
+  --page-gutter: clamp(1.25rem, 5vw, 6rem);
+
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+
+  --rule-hair: 1px;
+  --radius-control: 6px;
+  --radius-panel: 10px;
+
+  /* Depth — six named levels; no ad-hoc z values anywhere */
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  /* The nav sits above in-page sticky boxes so it always out-paints them. */
+  --z-sticky-nav: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
 }
 
 * {
@@ -21,29 +130,49 @@
   box-sizing: border-box;
 }
 
+/* `clip`, not `hidden` — hidden creates a scroll container and breaks sticky. */
+html,
+body {
+  overflow-x: clip;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
 html {
-  background: var(--color-background);
-  color: var(--color-foreground);
   scroll-behavior: auto;
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans);
-  overflow-x: hidden;
+  font-family: var(--font-body);
+  /* Light-on-dark reads optically heavier; drop body weight to compensate. */
+  font-weight: 350;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  /* Display-size compound words break instead of overflowing the viewport. */
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 ::selection {
   background: var(--color-accent);
-  color: #050505;
+  color: var(--color-accent-ink);
 }
 
-/* Accessible focus ring for keyboard users */
+/* Focus rings appear instantly — never transitioned, never animated. */
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-focus);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 html.lenis,
@@ -55,7 +184,90 @@ html.lenis body {
   scroll-behavior: auto !important;
 }
 
-/* Scroll progress bar */
+/* The mono outlier's single role: technical metadata labels. Muted rather than
+   neutral — neutral only clears 4.6:1 on paper, which is too thin a margin at
+   this size. */
+.label-meta {
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+
+/* Display-size text that isn't a heading still needs the long-word escape. */
+.display-line {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* Eight states, centrally. Press is a 1px settle; disabled is signalled on
+   three channels (opacity, cursor, the native attribute). */
+a[href]:active,
+button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Reserve the ring at rest so activating a field can't shift geometry. */
+input,
+textarea,
+select {
+  outline: 2px solid transparent;
+  outline-offset: 1px;
+  font: inherit;
+}
+
+/* Zero-sized radios stay in flow (absolute ones make the page jump to the top
+   on every click), so the visible chip carries the focus ring. */
+.chip:focus-within {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+/* Any column of figures aligns; proportional digits jitter while counting. */
+.numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Section rhythm is deliberately uneven: a section that opens an argument gets
+   more air above it than one continuing the previous thought. */
+.section {
+  padding-inline: var(--page-gutter);
+  padding-block: var(--space-3xl);
+  position: relative;
+}
+
+.section--opening {
+  padding-block: var(--space-4xl) var(--space-3xl);
+}
+
+/* The hero's bottom padding runs 1.5× its top so the fold pulls into the next
+   section instead of the hero floating in the middle of the viewport. */
+.section--hero {
+  padding-block: var(--space-3xl) var(--space-4xl);
+}
+
+.section--continues {
+  padding-block: var(--space-2xl) var(--space-3xl);
+}
+
+.section--close {
+  padding-block: var(--space-3xl) var(--space-4xl);
+}
+
 .scroll-progress {
   position: fixed;
   top: 0;
@@ -64,152 +276,232 @@ html.lenis body {
   width: 100%;
   transform: scaleX(0);
   transform-origin: 0 50%;
-  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-light));
-  z-index: 200;
+  background: var(--color-accent);
+  z-index: var(--z-sticky);
   pointer-events: none;
   will-change: transform;
 }
 
+/* Static film grain. No animation: an infinite loop pulls the eye and never
+   lets it go, and the texture reads identically standing still. */
 .grain-overlay {
   position: fixed;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  z-index: 9999;
+  inset: 0;
+  z-index: var(--z-raised);
   pointer-events: none;
-  opacity: 0.03;
+  opacity: 0.028;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-repeat: repeat;
-  animation: grain 0.5s steps(1) infinite;
 }
 
-@keyframes grain {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-5%, -10%); }
-  20% { transform: translate(-15%, 5%); }
-  30% { transform: translate(7%, -25%); }
-  40% { transform: translate(-5%, 25%); }
-  50% { transform: translate(-15%, 10%); }
-  60% { transform: translate(15%, 0%); }
-  70% { transform: translate(0%, 15%); }
-  80% { transform: translate(3%, 35%); }
-  90% { transform: translate(-10%, 10%); }
-}
-
-.custom-cursor {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--color-accent);
-  border-radius: 50%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 10000;
-  transform: translate3d(-100px, -100px, 0) translate(-50%, -50%) scale(1);
-  /* No transform transition — the rAF loop already smooths motion; a CSS
-     transition on top double-eases it and causes visible lag. */
-  transition: opacity 0.2s ease, background 0.2s ease;
-  mix-blend-mode: difference;
-  will-change: transform;
-}
-
-.custom-cursor.hovering {
-  background: var(--color-accent);
-  opacity: 0.6;
-}
-
-.marquee-track {
-  display: flex;
-  animation: marquee 40s linear infinite;
-}
-
-.marquee-track:hover {
-  animation-play-state: paused;
-}
-
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-.section-padding {
-  padding: 8rem 1.5rem;
-}
-
-@media (min-width: 768px) {
-  .section-padding {
-    padding: 12rem 4rem;
-  }
-}
-
-@media (min-width: 1280px) {
-  .section-padding {
-    padding: 12rem 8rem;
-  }
-}
-
-.hr-animated {
-  height: 1px;
-  background: var(--color-border);
-  position: relative;
-  overflow: hidden;
-}
-
-.hr-animated::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-/* Reveal-on-scroll base state. JS adds .is-visible when in view.
-   If JS never runs, content stays visible (progressive enhancement). */
+/* Reveal is fade-only: no travel, stagger capped at 500ms in useReveal.
+   Content stays visible if JS never runs. */
 .reveal {
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity var(--dur-long) var(--ease-out);
   transition-delay: var(--reveal-delay, 0ms);
 }
 
 .reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
 }
 
-/* Respect users who prefer reduced motion: kill all decorative motion. */
+/* Case-study system flow. Stages joined by hairline connectors: downward on
+   narrow screens, rightward from lg up. Parallel branches hang off a rule. */
+.system-flow__steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-lg);
+  margin-block-start: var(--space-sm);
+}
+
+.system-flow__step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-paper-2);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-control);
+}
+
+.system-flow__step:last-child {
+  border-color: var(--color-accent);
+}
+
+.system-flow__step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: var(--space-lg);
+  inset-block-start: 100%;
+  width: var(--rule-hair);
+  height: var(--space-lg);
+  background: var(--color-rule);
+}
+
+.system-flow__num {
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  color: var(--color-neutral);
+}
+
+.system-flow__step:last-child .system-flow__num {
+  color: var(--color-accent);
+}
+
+.system-flow__label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+
+.system-flow__note {
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+
+.system-flow__branches {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  padding-inline-start: var(--space-xs);
+  border-inline-start: var(--rule-hair) solid var(--color-rule);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+
+@media (min-width: 1024px) {
+  .system-flow__steps {
+    grid-template-columns: repeat(var(--flow-steps), minmax(0, 1fr));
+  }
+
+  .system-flow__step:not(:last-child)::after {
+    inset-inline-start: 100%;
+    inset-block-start: 50%;
+    width: var(--space-lg);
+    height: var(--rule-hair);
+  }
+}
+
+/* Client logo train: a full-bleed light strip with dark marks. Two identical
+   rows; the track slides by exactly one row's width (-50%), so the loop seam
+   is invisible. Marks fade at the edges; the strip itself stays solid. */
+.logo-marquee {
+  margin-inline: calc(50% - 50vw);
+  background: var(--color-panel);
+}
+
+.logo-marquee__viewport {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+.logo-marquee__track {
+  display: flex;
+  width: max-content;
+  animation: logo-marquee 48s linear infinite;
+}
+
+.logo-marquee:hover .logo-marquee__track,
+.logo-marquee:focus-within .logo-marquee__track,
+.logo-marquee[data-paused] .logo-marquee__track {
+  animation-play-state: paused;
+}
+
+.logo-marquee__row {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.logo-marquee__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 7rem;
+  padding-inline: var(--space-lg);
+}
+
+@media (min-width: 768px) {
+  .logo-marquee__item {
+    padding-inline: var(--space-xl);
+  }
+}
+
+.logo-marquee__mark {
+  display: block;
+  background-color: var(--color-panel-muted);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  transition: background-color var(--dur-short, 200ms) var(--ease-out);
+}
+
+.logo-marquee__item:hover .logo-marquee__mark {
+  background-color: var(--color-panel-ink);
+}
+
+.logo-marquee__toggle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: 999px;
+  transition: color var(--dur-short, 200ms) var(--ease-out),
+    border-color var(--dur-short, 200ms) var(--ease-out);
+}
+
+.logo-marquee__toggle:hover {
+  color: var(--color-ink);
+  border-color: var(--color-muted);
+}
+
+@keyframes logo-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-marquee__viewport {
+    mask-image: none;
+  }
+
+  .logo-marquee__track {
+    animation: none !important;
+    width: auto;
+  }
+
+  .logo-marquee__row {
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-shrink: 1;
+  }
+
+  .logo-marquee__row[aria-hidden],
+  .logo-marquee__toggle {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.001ms !important;
+    animation-duration: 150ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    transition-duration: 150ms !important;
     scroll-behavior: auto !important;
-  }
-
-  .grain-overlay,
-  .marquee-track {
-    animation: none !important;
   }
 
   .reveal {
     opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .custom-cursor {
-    display: none !important;
   }
 }

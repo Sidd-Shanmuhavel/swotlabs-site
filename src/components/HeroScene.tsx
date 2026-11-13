@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, MeshDistortMaterial } from "@react-three/drei";
 import * as THREE from "three";
@@ -12,7 +12,9 @@ function ParticleField({ reduced }: { reduced: boolean }) {
   const count = 2000;
   const { currentColors } = useTheme();
 
-  const positions = useMemo(() => {
+  // Lazy state initializer runs exactly once (off the render-purity path), so
+  // the random particle cloud is generated a single time and stays stable.
+  const [positions] = useState(() => {
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       pos[i * 3] = (Math.random() - 0.5) * 20;
@@ -20,7 +22,7 @@ function ParticleField({ reduced }: { reduced: boolean }) {
       pos[i * 3 + 2] = (Math.random() - 0.5) * 20;
     }
     return pos;
-  }, []);
+  });
 
   useFrame((state) => {
     if (reduced) return;

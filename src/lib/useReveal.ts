@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
+/** Hard ceiling on cumulative stagger, per design.md § Motion. */
+const MAX_STAGGER = 500;
+
 type RevealOptions = {
   /** Stagger between direct children that carry the `data-reveal-child` attr (ms). */
   stagger?: number;
@@ -36,8 +39,11 @@ export function useReveal<T extends HTMLElement = HTMLElement>(
     );
 
     // Apply stagger delays up front so they're ready when .is-visible lands.
+    // Total stagger is capped at 500ms: past that the section feels slow to
+    // settle and the last item reads as lagging rather than sequenced.
     children.forEach((child, i) => {
-      child.style.setProperty("--reveal-delay", `${delay + i * stagger}ms`);
+      const offset = Math.min(i * stagger, MAX_STAGGER);
+      child.style.setProperty("--reveal-delay", `${delay + offset}ms`);
     });
     if (delay) el.style.setProperty("--reveal-delay", `${delay}ms`);
 

@@ -1,16 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
 import { useTheme, ThemeColor, themeOptions } from "@/providers/ThemeProvider";
-import { prefersReducedMotion } from "@/lib/useReducedMotion";
-import MagneticButton from "./MagneticButton";
 
-const navLinks = [
-  { label: "Services", href: "#services", id: "services" },
-  { label: "Clients", href: "#clients", id: "clients" },
-  { label: "About", href: "#about", id: "about" },
-  { label: "Contact", href: "#contact", id: "contact" },
+/**
+ * N9 · Edge-aligned minimal. Wordmark hard-left, one action hard-right, nothing
+ * in between — the empty middle is the design. Section navigation lives behind
+ * a disclosure instead of an inline link row, which is the AI-nav fingerprint.
+ */
+
+const sections = [
+  { label: "Services", href: "#services" },
+  { label: "Clients", href: "#clients" },
+  { label: "Work", href: "#work" },
+  { label: "About", href: "#about" },
+  { label: "Questions", href: "#faq" },
 ];
 
 const themeLabels: Record<ThemeColor, string> = {
@@ -21,197 +25,160 @@ const themeLabels: Record<ThemeColor, string> = {
 };
 
 export default function Navbar() {
-  const navRef = useRef<HTMLElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>("");
   const { theme, setTheme } = useTheme();
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const el = navRef.current;
-    if (!el) return;
-
-    if (prefersReducedMotion()) {
-      gsap.set(el, { y: 0, opacity: 1 });
-    } else {
-      gsap.fromTo(
-        el,
-        { y: -100, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, ease: "power3.out", delay: 0.5 }
-      );
-    }
-
-    const onScroll = () => setScrolled(window.scrollY > 50);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Highlight the section currently in view.
+  // Lock body scroll and allow Escape to close while the index is open.
   useEffect(() => {
-    const sections = navLinks
-      .map((l) => document.getElementById(l.id))
-      .filter((s): s is HTMLElement => Boolean(s));
-    if (!sections.length) return;
+    if (!menuOpen) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) setActiveSection(entry.target.id);
-        });
-      },
-      { rootMargin: "-45% 0px -50% 0px" }
-    );
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
 
-    sections.forEach((s) => observer.observe(s));
-    return () => observer.disconnect();
-  }, []);
-
-  // Lock body scroll while the mobile menu is open.
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
     };
   }, [menuOpen]);
 
   return (
-    <nav
-      ref={navRef}
-      className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${
-        scrolled
-          ? "bg-background/80 backdrop-blur-xl border-b border-border"
-          : "bg-transparent"
+    <header
+      className={`fixed top-0 left-0 w-full ${
+        scrolled ? "bg-paper/95 border-b border-rule" : "bg-transparent"
       }`}
+      style={{
+        zIndex: "var(--z-sticky-nav)",
+        transition: "background-color var(--dur-short) var(--ease-out)",
+      }}
     >
-      <div className="flex items-center justify-between px-6 md:px-12 py-5">
-        <a href="#" className="text-xl font-bold tracking-tight" aria-label="SwotLabs home">
+      <div
+        className="flex items-center justify-between"
+        style={{
+          paddingInline: "var(--page-gutter)",
+          paddingBlock: "var(--space-md)",
+        }}
+      >
+        <a
+          href="#top"
+          className="font-display text-md font-bold tracking-tight"
+          aria-label="SwotLabs home"
+        >
           <span className="text-accent">swot</span>labs
         </a>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-10">
-          {navLinks.map((link) => {
-            const active = activeSection === link.id;
-            return (
-              <a
-                key={link.label}
-                href={link.href}
-                aria-current={active ? "true" : undefined}
-                className={`text-sm transition-colors duration-300 tracking-wide uppercase ${
-                  active ? "text-accent" : "text-muted hover:text-foreground"
-                }`}
-                data-cursor-hover
-              >
-                {link.label}
-              </a>
-            );
-          })}
-
-          {/* Theme Selector */}
-          <div
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-border bg-surface/30 backdrop-blur-sm"
-            role="group"
-            aria-label="Accent color"
+        <div className="flex items-center" style={{ gap: "var(--space-lg)" }}>
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="text-sm text-muted hover:text-ink cursor-pointer"
+            style={{ transition: "color var(--dur-micro) var(--ease-out)" }}
+            aria-expanded={menuOpen}
+            aria-controls="site-index"
           >
-            {(["lime", "cyan", "orange", "blue"] as ThemeColor[]).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTheme(t)}
-                aria-label={`${themeLabels[t]} accent`}
-                aria-pressed={theme === t}
-                className={`w-3.5 h-3.5 rounded-full transition-all duration-300 relative cursor-pointer ${
-                  theme === t
-                    ? "scale-110 ring-2 ring-offset-2 ring-offset-background ring-accent"
-                    : "opacity-60 hover:opacity-100 hover:scale-105"
-                }`}
-                style={{ backgroundColor: themeOptions[t].accent }}
-                data-cursor-hover
-              />
-            ))}
-          </div>
+            Menu
+          </button>
 
-          <MagneticButton
+          <a
             href="#contact"
-            className="px-6 py-2.5 border border-accent text-accent text-sm rounded-full hover:bg-accent hover:text-background transition-colors duration-300"
+            className="whitespace-nowrap border border-accent text-accent text-sm hover:bg-accent hover:text-accent-ink"
+            style={{
+              paddingInline: "var(--space-md)",
+              paddingBlock: "var(--space-xs)",
+              borderRadius: "var(--radius-control)",
+              transition:
+                "background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out)",
+            }}
           >
-            Get in touch
-          </MagneticButton>
+            Talk to us
+          </a>
         </div>
-
-        {/* Mobile burger */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden flex flex-col gap-1.5 z-[110]"
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-          aria-controls="mobile-menu"
-        >
-          <span
-            className={`block w-6 h-0.5 bg-foreground transition-transform duration-300 ${
-              menuOpen ? "rotate-45 translate-y-2" : ""
-            }`}
-          />
-          <span
-            className={`block w-6 h-0.5 bg-foreground transition-opacity duration-300 ${
-              menuOpen ? "opacity-0" : ""
-            }`}
-          />
-          <span
-            className={`block w-6 h-0.5 bg-foreground transition-transform duration-300 ${
-              menuOpen ? "-rotate-45 -translate-y-2" : ""
-            }`}
-          />
-        </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* Index overlay — the section list and the accent anchor live here. */}
       <div
-        id="mobile-menu"
+        id="site-index"
         inert={!menuOpen}
         aria-hidden={!menuOpen}
-        className={`fixed inset-0 bg-background z-[105] flex flex-col items-center justify-center gap-8 transition-all duration-500 md:hidden ${
-          menuOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+        className={`fixed inset-0 bg-paper flex flex-col justify-center ${
+          menuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
+        style={{
+          zIndex: "var(--z-modal)",
+          paddingInline: "var(--page-gutter)",
+          transition: "opacity var(--dur-short) var(--ease-out)",
+        }}
       >
-        {navLinks.map((link) => (
-          <a
-            key={link.label}
-            href={link.href}
-            onClick={() => setMenuOpen(false)}
-            className="text-3xl font-light tracking-wide hover:text-accent transition-colors"
-          >
-            {link.label}
-          </a>
-        ))}
-
-        {/* Theme Selector (Mobile) */}
-        <div
-          className="flex items-center gap-4 mt-8 px-4 py-2 rounded-full border border-border bg-surface/50"
-          role="group"
-          aria-label="Accent color"
+        <button
+          ref={closeRef}
+          onClick={() => setMenuOpen(false)}
+          className="text-sm text-muted hover:text-ink absolute cursor-pointer"
+          style={{
+            top: "var(--space-lg)",
+            right: "var(--page-gutter)",
+            transition: "color var(--dur-micro) var(--ease-out)",
+          }}
         >
-          {(["lime", "cyan", "orange", "blue"] as ThemeColor[]).map((t) => (
+          Close
+        </button>
+
+        <nav
+          className="flex flex-col"
+          style={{ gap: "var(--space-sm)" }}
+          aria-label="Sections"
+        >
+          {sections.map((section, i) => (
+            <a
+              key={section.label}
+              href={section.href}
+              onClick={() => setMenuOpen(false)}
+              className="font-display text-2xl font-bold tracking-tight hover:text-accent w-fit"
+              style={{ transition: "color var(--dur-micro) var(--ease-out)" }}
+            >
+              <span className="label-meta align-super numeric" style={{ marginRight: "var(--space-sm)" }}>
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              {section.label}
+            </a>
+          ))}
+        </nav>
+
+        <div
+          className="flex items-center flex-wrap"
+          style={{ gap: "var(--space-md)", marginTop: "var(--space-2xl)" }}
+          role="group"
+          aria-label="Accent anchor"
+        >
+          <span className="label-meta">Accent</span>
+          {(Object.keys(themeOptions) as ThemeColor[]).map((t) => (
             <button
               key={t}
-              onClick={() => {
-                setTheme(t);
-                setMenuOpen(false);
-              }}
+              onClick={() => setTheme(t)}
               aria-label={`${themeLabels[t]} accent`}
               aria-pressed={theme === t}
-              className={`w-6 h-6 rounded-full transition-all duration-300 relative cursor-pointer ${
-                theme === t
-                  ? "scale-110 ring-2 ring-offset-2 ring-offset-background ring-accent"
-                  : "opacity-60 hover:opacity-100"
-              }`}
-              style={{ backgroundColor: themeOptions[t].accent }}
+              className="cursor-pointer"
+              style={{
+                width: "1.25rem",
+                height: "1.25rem",
+                borderRadius: "var(--radius-control)",
+                backgroundColor: themeOptions[t].accent,
+                opacity: theme === t ? 1 : 0.45,
+                transition: "opacity var(--dur-micro) var(--ease-out)",
+              }}
             />
           ))}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }

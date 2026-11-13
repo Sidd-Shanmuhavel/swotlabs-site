@@ -1,30 +1,39 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/providers/SmoothScroll";
-import CustomCursor from "@/components/CustomCursor";
 import ScrollProgress from "@/components/ScrollProgress";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/providers/ThemeProvider";
 
+// 2+1: Space Grotesk carries display and the wordmark, Geist carries prose,
+// JetBrains Mono is the outlier and tags exactly one role — metadata labels.
 const display = Space_Grotesk({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-display",
+  variable: "--font-space-grotesk",
+});
+
+const body = Geist({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist",
 });
 
 const mono = JetBrains_Mono({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-mono-jb",
+  variable: "--font-jetbrains-mono",
 });
 
 const SITE_URL = "https://swotlabs.com";
 
+const DESCRIPTION =
+  "SwotLabs AGI Limited is an Ireland-based AI services company. We build agentic systems for enterprises in energy, water, aviation and retail across the UK and Europe: multimodal RAG, document pipelines and email triage.";
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "SwotLabs AGI Limited | Enterprise AI Services",
-  description:
-    "SwotLabs AGI Limited is an Ireland-based AI services company delivering transformative intelligence solutions to enterprise clients across the UK & Europe.",
+  description: DESCRIPTION,
   keywords: [
     "AI services",
     "enterprise AI",
@@ -40,19 +49,18 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: "SwotLabs AGI Limited",
     title: "SwotLabs AGI Limited | Enterprise AI Services",
-    description:
-      "Ireland-based AI services company delivering transformative intelligence solutions to enterprise clients across the UK & Europe.",
+    description: DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
     title: "SwotLabs AGI Limited | Enterprise AI Services",
-    description:
-      "Ireland-based AI services company delivering transformative intelligence solutions to enterprise clients across the UK & Europe.",
+    description: DESCRIPTION,
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050505",
+  // sRGB approximation of --color-paper, oklch(14% 0.012 130).
+  themeColor: "#0b0e08",
   colorScheme: "dark",
 };
 
@@ -64,19 +72,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`h-full antialiased ${display.variable} ${mono.variable}`}
+      className={`h-full antialiased ${display.variable} ${body.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
       <head>
-        {/* Apply saved accent before first paint to avoid a color flash. */}
+        {/* Apply the saved accent ramp before first paint to avoid a flash. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col">
         <SmoothScroll>
           <ThemeProvider>
             <ScrollProgress />
-            <CustomCursor />
-            <div className="grain-overlay" />
+            <div className="grain-overlay" aria-hidden="true" />
             {children}
           </ThemeProvider>
         </SmoothScroll>
