@@ -1,27 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 const QUERY = "(prefers-reduced-motion: reduce)";
 
+function subscribe(callback: () => void): () => void {
+  const mql = window.matchMedia(QUERY);
+  mql.addEventListener("change", callback);
+  return () => mql.removeEventListener("change", callback);
+}
+
 /**
- * Tracks the user's prefers-reduced-motion setting reactively.
- * Returns `false` on the server / first render, then syncs after mount
- * so SSR markup stays stable (no hydration mismatch).
+ * Tracks the user's prefers-reduced-motion setting reactively via
+ * useSyncExternalStore — the React-recommended way to subscribe to an external
+ * store like matchMedia. Returns `false` during SSR (the server snapshot) so
+ * markup stays stable, then reflects the real value after hydration.
  */
 export function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const mql = window.matchMedia(QUERY);
-    setReduced(mql.matches);
-
-    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
-
-  return reduced;
+  return useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(QUERY).matches, // client snapshot
+    () => false // server snapshot
+  );
 }
 
 /** Synchronous read for use inside effects / event handlers. */

@@ -1,108 +1,97 @@
 "use client";
 
-import SectionLabel from "./SectionLabel";
+import SectionHead from "./SectionHead";
 import { useReveal } from "@/lib/useReveal";
+
+/**
+ * Split Studio diptych — statement on the left four columns, the practice list
+ * as the proof half on the right seven. No ordinal eyebrows: these are a menu
+ * of practices, not steps in a sequence.
+ */
 
 const services = [
   {
-    number: "01",
-    title: "AI Strategy & Consulting",
+    title: "AI strategy & consulting",
     description:
-      "We partner with enterprise leaders to define AI roadmaps, identify high-impact use cases, and build scalable adoption frameworks.",
-    tags: ["Strategy", "Roadmapping", "ROI Analysis"],
+      "We pick the use cases and write the roadmap with the people who will run the system once we hand it over.",
+    capabilities: "Strategy · Roadmapping · ROI analysis",
   },
   {
-    number: "02",
-    title: "Machine Learning Engineering",
+    title: "Machine learning engineering",
     description:
-      "Custom ML model development, training, and deployment — from NLP and computer vision to predictive analytics and recommendation systems.",
-    tags: ["NLP", "Computer Vision", "Predictive Models"],
+      "We train and deploy models for language, vision and forecasting problems, on your data rather than a benchmark.",
+    capabilities: "NLP · Computer vision · Predictive models",
   },
   {
-    number: "03",
-    title: "Generative AI Solutions",
+    title: "Generative AI systems",
     description:
-      "Enterprise-grade generative AI applications, including RAG pipelines, intelligent agents, fine-tuned LLMs, and multimodal AI systems.",
-    tags: ["LLMs", "RAG", "AI Agents"],
+      "Retrieval pipelines, agent orchestration and multimodal assistants that hold up once real users reach them.",
+    capabilities: "LLMs · RAG · Agents · MCP",
   },
   {
-    number: "04",
-    title: "Data Engineering & MLOps",
+    title: "Data engineering & MLOps",
     description:
-      "End-to-end data pipeline architecture, feature stores, model monitoring, and CI/CD for ML — ensuring reliability at scale.",
-    tags: ["Pipelines", "MLOps", "Monitoring"],
+      "The pipelines, evaluation harnesses and monitoring that keep a model working through the year after launch.",
+    capabilities: "Pipelines · MLOps · Monitoring",
   },
   {
-    number: "05",
-    title: "AI Safety & Governance",
+    title: "AI safety & governance",
     description:
-      "Responsible AI frameworks, bias auditing, explainability tooling, and compliance with EU AI Act and emerging regulations.",
-    tags: ["Governance", "Ethics", "Compliance"],
+      "We audit for bias, instrument explainability, track model lineage and write the documentation the EU AI Act asks for.",
+    capabilities: "Governance · Evaluation · Compliance",
   },
 ];
 
 export default function Services() {
-  const headingRef = useReveal<HTMLHeadingElement>();
-  const listRef = useReveal<HTMLDivElement>({ stagger: 110 });
+  const listRef = useReveal<HTMLDivElement>({ stagger: 70 });
 
   return (
-    <section id="services" className="section-padding relative">
-      <SectionLabel>What we do</SectionLabel>
-
-      <h2
-        ref={headingRef}
-        className="reveal text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-20 max-w-4xl"
+    <section id="services" className="section section--continues">
+      <div
+        className="grid grid-cols-1 lg:grid-cols-12"
+        style={{ gap: "var(--space-2xl)" }}
       >
-        AI services that <span className="text-accent">transform</span> enterprise
-      </h2>
+        <SectionHead
+          className="lg:col-span-4"
+          title="The five practices"
+          lede="From the first roadmap to the monitoring that runs a year after launch."
+        />
 
-      <div ref={listRef} className="space-y-0">
-        {services.map((service) => (
-          <div
-            key={service.number}
-            data-reveal-child
-            className="reveal service-card group border-t border-border py-10 md:py-14 transition-colors duration-300 hover:bg-surface/20"
-          >
-            <div className="flex flex-col md:flex-row md:items-start gap-6 md:gap-12">
-              <span className="text-accent font-mono text-sm shrink-0 md:pt-1.5">
-                {service.number}
-              </span>
-              <div className="flex-1">
-                <h3 className="text-2xl md:text-4xl font-semibold tracking-tight mb-4 group-hover:text-accent transition-colors duration-300">
-                  {service.title}
-                </h3>
-                <p className="text-muted text-base md:text-lg leading-relaxed max-w-2xl mb-6">
-                  {service.description}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {service.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 text-xs border border-border rounded-full text-muted group-hover:border-accent/30 group-hover:text-accent/70 transition-all duration-300"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="hidden md:block shrink-0 self-center opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-accent -rotate-45"
-                  aria-hidden="true"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        ))}
-        <div className="border-t border-border" />
+        <div ref={listRef} className="lg:col-span-7 lg:col-start-6">
+          {services.map((service, i) => (
+            <article
+              key={service.title}
+              data-reveal-child
+              className="reveal group border-t border-rule"
+              style={{
+                paddingBlock: i === 0 ? "var(--space-lg)" : "var(--space-xl)",
+              }}
+            >
+              <h3
+                className="text-md md:text-lg group-hover:text-accent"
+                style={{ transition: "color var(--dur-micro) var(--ease-out)" }}
+              >
+                {service.title}
+              </h3>
+              <p
+                className="text-muted text-sm"
+                style={{
+                  maxWidth: "62ch",
+                  marginBlockStart: "var(--space-sm)",
+                }}
+              >
+                {service.description}
+              </p>
+              <p
+                className="label-meta"
+                style={{ marginBlockStart: "var(--space-md)" }}
+              >
+                {service.capabilities}
+              </p>
+            </article>
+          ))}
+          <div className="border-t border-rule" />
+        </div>
       </div>
     </section>
   );

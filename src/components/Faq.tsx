@@ -1,110 +1,133 @@
 "use client";
 
 import { useState } from "react";
-import SectionLabel from "./SectionLabel";
+import SectionHead from "./SectionHead";
 import { useReveal } from "@/lib/useReveal";
+
+/**
+ * Questions on the left, statement on the right — the diptych flips again.
+ * Answers are written to answer, not to sell.
+ */
 
 const faqs = [
   {
-    question: "What services does SwotLabs specialize in?",
+    question: "What do you build?",
     answer:
-      "We deliver end-to-end AI consulting, ML engineering, Generative AI integration, and robust MLOps. Our engineers build custom models, fine-tune LLMs, design retrieval-augmented generation (RAG) systems, and configure intelligent agent systems tailored to enterprise workflows.",
+      "Agentic systems with one job each. A field assistant that answers from engineering drawings. An email triage agent that opens populated CRM cases. A policy assistant that cites the document it read. We build the plumbing underneath them too: retrieval pipelines, evaluation harnesses and the monitoring that catches a model drifting.",
   },
   {
-    question: "How do you ensure AI safety and regulatory compliance?",
+    question: "How do you handle AI safety and compliance?",
     answer:
-      "We design responsible AI frameworks aligned with international standards and the EU AI Act. Our services include bias audits, explainability instrumentation, model lineage tracking, risk assessment documentation, and safe-by-design development practices.",
+      "We audit for bias, instrument explainability, track model lineage and write the risk documentation the EU AI Act asks for. We test a classifier against a labelled set before it ships and keep measuring its accuracy in production. When a system has no source for an answer, it says so.",
   },
   {
-    question: "Which industries do you partner with?",
+    question: "Which sectors do you know well?",
     answer:
-      "We partner with industry-leading enterprise clients across sectors that power everyday life, including energy distribution (e.g., UKPN), aviation (e.g., Virgin Atlantic), hospitality, utilities (e.g., Northumbrian Water), and secure data platforms.",
+      "Energy distribution, water, aviation, hospitality, social housing and consumer-data platforms. Our client index names them: UK Power Networks, Northumbrian Water, Virgin Atlantic, Greene King, Civitas, CK Delta and Circana.",
   },
   {
-    question: "How does the path to AGI impact enterprise strategies today?",
+    question: "Do we need a data platform before we start?",
     answer:
-      "We believe true capability scales incrementally. By designing enterprise workflows that leverage state-of-the-art agent systems today, we build architectures ready to adapt as model cognitive capabilities approach artificial general intelligence (AGI), ensuring long-term technological stability.",
+      "No. Most of our work lands on Databricks, because that is where these clients already keep their documents and tables. With nothing in place, a first engagement covers one narrow use case and the pipeline it needs.",
+  },
+  {
+    question: "Why does AGI appear in your name?",
+    answer:
+      "Model capability keeps moving, and we design for that. The architecture around a model, its tool interfaces, evaluation and human review points, survives a model swap, so a stronger release is a substitution instead of a rebuild. The name is a statement about architecture, and it says nothing about timelines.",
   },
 ];
 
 export default function Faq() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const headingRef = useReveal<HTMLDivElement>({ stagger: 120 });
-  const listRef = useReveal<HTMLDivElement>({ stagger: 90 });
-
-  const toggleAccordion = (index: number) => {
-    setActiveIndex(activeIndex === index ? null : index);
-  };
+  const listRef = useReveal<HTMLDivElement>({ stagger: 60 });
 
   return (
-    <section id="faq" className="section-padding relative">
-      <SectionLabel>FAQ</SectionLabel>
+    <section id="faq" className="section section--continues">
+      <div
+        className="grid grid-cols-1 lg:grid-cols-12"
+        style={{ gap: "var(--space-2xl)" }}
+      >
+        <SectionHead
+          className="lg:col-span-4 lg:col-start-9 lg:row-start-1"
+          title="Questions we get asked"
+          lede="Email us anything this does not cover and we will answer it."
+        />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-        <div ref={headingRef} className="lg:col-span-5">
-          <h2
-            data-reveal-child
-            className="reveal text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight"
-          >
-            Frequently <br className="hidden md:block" />
-            asked <span className="text-accent">questions</span>
-          </h2>
-          <p data-reveal-child className="reveal text-muted text-lg leading-relaxed max-w-sm">
-            Everything you need to know about our capabilities, process, safety
-            compliance, and vision.
-          </p>
-        </div>
+        <div
+          ref={listRef}
+          className="lg:col-span-7 lg:col-start-1 lg:row-start-1"
+        >
+          {faqs.map((faq, index) => {
+            const isOpen = activeIndex === index;
+            const panelId = `faq-panel-${index}`;
+            const buttonId = `faq-button-${index}`;
 
-        <div className="lg:col-span-7">
-          <div ref={listRef} className="divide-y divide-border">
-            {faqs.map((faq, index) => {
-              const isOpen = activeIndex === index;
-              const panelId = `faq-panel-${index}`;
-              const buttonId = `faq-button-${index}`;
-              return (
-                <div key={index} data-reveal-child className="reveal py-6">
+            return (
+              <div
+                key={faq.question}
+                data-reveal-child
+                className="reveal border-t border-rule"
+              >
+                <h3>
                   <button
                     id={buttonId}
-                    onClick={() => toggleAccordion(index)}
-                    className="w-full flex items-center justify-between text-left group cursor-pointer"
+                    onClick={() => setActiveIndex(isOpen ? null : index)}
+                    className="w-full flex items-baseline justify-between text-left group cursor-pointer text-md font-bold tracking-tight"
+                    style={{
+                      gap: "var(--space-md)",
+                      paddingBlock: "var(--space-lg)",
+                      fontFamily: "var(--font-display)",
+                    }}
                     aria-expanded={isOpen}
                     aria-controls={panelId}
-                    data-cursor-hover
                   >
-                    <span className="text-lg md:text-xl font-medium group-hover:text-accent transition-colors duration-300">
+                    <span
+                      className="group-hover:text-accent"
+                      style={{
+                        transition: "color var(--dur-micro) var(--ease-out)",
+                      }}
+                    >
                       {faq.question}
                     </span>
                     <span
-                      className={`w-6 h-6 border border-border rounded-full flex items-center justify-center shrink-0 ml-4 group-hover:border-accent transition-all duration-300 ${
-                        isOpen ? "bg-accent border-accent text-background rotate-45" : "text-muted"
-                      }`}
                       aria-hidden="true"
+                      className={`text-sm shrink-0 font-normal ${
+                        isOpen ? "text-accent" : "text-muted"
+                      }`}
+                      style={{ fontFamily: "var(--font-body)" }}
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                      </svg>
+                      {isOpen ? "Close" : "Open"}
                     </span>
                   </button>
+                </h3>
 
-                  <div
-                    id={panelId}
-                    role="region"
-                    aria-labelledby={buttonId}
-                    className={`grid transition-all duration-300 ease-in-out ${
-                      isOpen ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"
-                    }`}
-                  >
-                    <div className="overflow-hidden">
-                      <p className="text-muted text-sm md:text-base leading-relaxed max-w-2xl pb-2">
-                        {faq.answer}
-                      </p>
-                    </div>
+                <div
+                  id={panelId}
+                  role="region"
+                  aria-labelledby={buttonId}
+                  className="grid"
+                  style={{
+                    gridTemplateRows: isOpen ? "1fr" : "0fr",
+                    transition:
+                      "grid-template-rows var(--dur-long) var(--ease-in-out)",
+                  }}
+                >
+                  <div className="overflow-hidden">
+                    <p
+                      className="text-muted text-sm"
+                      style={{
+                        maxWidth: "68ch",
+                        paddingBlockEnd: "var(--space-lg)",
+                      }}
+                    >
+                      {faq.answer}
+                    </p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
+          <div className="border-t border-rule" />
         </div>
       </div>
     </section>

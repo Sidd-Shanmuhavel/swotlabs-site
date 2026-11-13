@@ -2,58 +2,44 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import dynamic from "next/dynamic";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
-import MagneticButton from "./MagneticButton";
 
-const HeroScene = dynamic(() => import("./HeroScene"), { ssr: false });
+/**
+ * Split Studio opening diptych: the positioning statement holds the left seven
+ * columns, the proof column holds the right four. Left-biased, height set by
+ * its content — no full-viewport centring, no ambient 3D, no enrichment.
+ */
+
+const facts = [
+  { key: "Registered", value: "Dublin, Ireland" },
+  { key: "Delivery", value: "United Kingdom & Europe" },
+  { key: "Practice", value: "Agentic systems, multimodal RAG, MLOps" },
+  { key: "Sectors", value: "Energy · Water · Aviation · Retail data" },
+];
 
 export default function Hero() {
-  const containerRef = useRef<HTMLElement>(null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  const subRef = useRef<HTMLParagraphElement>(null);
+  const ledeRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const badgeRef = useRef<HTMLDivElement>(null);
+  const factsRef = useRef<HTMLDListElement>(null);
 
   useEffect(() => {
-    const targets = [
-      badgeRef.current,
-      headingRef.current,
-      subRef.current,
-      ctaRef.current,
-    ];
+    const targets = [ledeRef.current, ctaRef.current, factsRef.current];
 
-    // Reduced motion: reveal everything immediately, no entrance animation.
+    // One orchestrated entrance, opacity only, total stagger under 500ms.
+    // The h1 is not in it: it paints at full contrast on the first frame, so
+    // the headline never reads dim while JS loads (and LCP isn't held back).
     if (prefersReducedMotion()) {
-      gsap.set(targets, { y: 0, opacity: 1 });
+      gsap.set(targets, { opacity: 1 });
       return;
     }
 
-    const tl = gsap.timeline({ delay: 0.8 });
-
-    tl.fromTo(
-      badgeRef.current,
-      { y: 30, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
-    )
-      .fromTo(
-        headingRef.current,
-        { y: 80, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, ease: "power3.out" },
-        "-=0.4"
-      )
-      .fromTo(
-        subRef.current,
-        { y: 40, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" },
-        "-=0.5"
-      )
-      .fromTo(
-        ctaRef.current,
-        { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" },
-        "-=0.4"
-      );
+    const tl = gsap.timeline({ delay: 0.15 });
+    tl.to(targets, {
+      opacity: 1,
+      duration: 0.42,
+      ease: "power2.out",
+      stagger: 0.11,
+    });
 
     return () => {
       tl.kill();
@@ -61,84 +47,85 @@ export default function Hero() {
   }, []);
 
   return (
-    <section
-      ref={containerRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
-    >
-      <HeroScene />
+    <section id="top" className="section section--hero">
+      <div
+        className="grid grid-cols-1 lg:grid-cols-12"
+        style={{ gap: "var(--space-2xl)" }}
+      >
+        <div className="lg:col-span-7">
+          <h1
+            className="text-display"
+            style={{ maxWidth: "18ch" }}
+          >
+            Agentic AI systems for critical infrastructure
+          </h1>
 
-      {/* Gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-[1]" />
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent z-[1]" />
+          <p
+            ref={ledeRef}
+            className="text-muted text-md opacity-0"
+            style={{ maxWidth: "58ch", marginBlockStart: "var(--space-xl)" }}
+          >
+            SwotLabs AGI Limited is an Ireland-based AI services company. We
+            build the systems that read your documents and triage your work,
+            then keep them running after the pilot ends.
+          </p>
 
-      {/* Content */}
-      <div className="relative z-10 text-center max-w-5xl mx-auto px-6">
-        <div
-          ref={badgeRef}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-surface/50 backdrop-blur-sm mb-8 opacity-0"
-        >
-          <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-          <span className="text-xs text-muted tracking-widest uppercase font-mono">
-            Irish AI Innovation
-          </span>
+          <div
+            ref={ctaRef}
+            className="flex flex-wrap items-center opacity-0"
+            style={{ gap: "var(--space-md)", marginBlockStart: "var(--space-xl)" }}
+          >
+            <a
+              href="#work"
+              className="whitespace-nowrap bg-accent text-accent-ink text-sm font-medium hover:bg-accent-light"
+              style={{
+                paddingInline: "var(--space-lg)",
+                paddingBlock: "var(--space-sm)",
+                borderRadius: "var(--radius-control)",
+                transition: "background-color var(--dur-micro) var(--ease-out)",
+              }}
+            >
+              Read the work
+            </a>
+            <a
+              href="#services"
+              className="whitespace-nowrap border border-rule text-ink text-sm hover:border-accent hover:text-accent"
+              style={{
+                paddingInline: "var(--space-lg)",
+                paddingBlock: "var(--space-sm)",
+                borderRadius: "var(--radius-control)",
+                transition:
+                  "border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out)",
+              }}
+            >
+              What we do
+            </a>
+          </div>
         </div>
 
-        <h1
-          ref={headingRef}
-          className="text-5xl md:text-7xl lg:text-[6rem] font-bold leading-[0.95] tracking-tight mb-8 opacity-0"
+        {/* Proof half of the diptych: facts, not decoration. */}
+        <dl
+          ref={factsRef}
+          className="lg:col-span-4 lg:col-start-9 self-end opacity-0"
         >
-          <span className="block">Building the</span>
-          <span className="block mt-2">
-            future with{" "}
-            <span className="text-accent relative">
-              AGI
-              <svg
-                className="absolute -bottom-2 left-0 w-full"
-                viewBox="0 0 200 12"
-                fill="none"
+          {facts.map((fact) => (
+            <div
+              key={fact.key}
+              className="border-t border-rule"
+              style={{
+                paddingBlock: "var(--space-md)",
+              }}
+            >
+              <dt className="label-meta">{fact.key}</dt>
+              <dd
+                className="text-ink text-sm"
+                style={{ marginBlockStart: "var(--space-2xs)" }}
               >
-                <path
-                  d="M2 8C50 2 150 2 198 8"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  opacity="0.5"
-                />
-              </svg>
-            </span>
-          </span>
-        </h1>
-
-        <p
-          ref={subRef}
-          className="text-lg md:text-xl text-muted max-w-2xl mx-auto mb-12 leading-relaxed opacity-0"
-        >
-          SwotLabs AGI Limited is an Ireland-based AI services company delivering
-          transformative intelligence solutions to enterprise clients across the UK & Europe.
-        </p>
-
-        <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 justify-center opacity-0">
-          <MagneticButton
-            href="#services"
-            className="px-8 py-4 bg-accent text-background rounded-full text-sm font-medium tracking-wide hover:bg-accent-light transition-colors duration-300 hover:shadow-[0_0_40px_var(--color-accent-border)]"
-          >
-            Explore our services
-          </MagneticButton>
-          <MagneticButton
-            href="#clients"
-            className="px-8 py-4 border border-border text-foreground rounded-full text-sm font-medium tracking-wide hover:border-accent hover:text-accent transition-colors duration-300"
-          >
-            View our work
-          </MagneticButton>
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
-        <span className="text-xs text-muted tracking-widest uppercase font-mono">Scroll</span>
-        <div className="w-5 h-8 border border-muted/30 rounded-full flex justify-center">
-          <div className="w-1 h-2 bg-accent rounded-full mt-1.5 animate-bounce" />
-        </div>
+                {fact.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

@@ -1,19 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import SectionLabel from "./SectionLabel";
+import SectionHead from "./SectionHead";
 import { useReveal } from "@/lib/useReveal";
 
+/**
+ * Closing diptych: how to reach us on the left, the form on the right.
+ *
+ * Labels are visible rather than floating, focus rings are the global ring
+ * (nothing calls outline-none), and success is stated in place — no pulsing
+ * checkmark, no celebratory toast for a thing the user can already see.
+ */
+
 const interestOptions = [
-  { id: "consulting", label: "Strategy & Consulting" },
-  { id: "engineering", label: "ML Engineering" },
+  { id: "consulting", label: "Strategy & consulting" },
+  { id: "engineering", label: "ML engineering" },
   { id: "generative", label: "Generative AI" },
-  { id: "safety", label: "AI Safety / EU Act" },
+  { id: "safety", label: "AI safety / EU AI Act" },
 ] as const;
 
 type Interest = (typeof interestOptions)[number]["id"];
 
-// Broad list of enterprise industries SwotLabs may work with.
 const industries = [
   "Energy & Utilities",
   "Aviation & Aerospace",
@@ -42,9 +49,29 @@ const industries = [
   "Other",
 ] as const;
 
+const reach = [
+  { key: "Email", value: "hello@swotlabs.com", href: "mailto:hello@swotlabs.com" },
+  { key: "Based", value: "Dublin, Ireland" },
+  { key: "Working", value: "United Kingdom & Europe" },
+];
+
+const fieldClass =
+  "w-full text-ink text-sm bg-paper-2 border border-rule focus:border-accent";
+
+const fieldStyle: React.CSSProperties = {
+  paddingInline: "var(--space-md)",
+  paddingBlock: "var(--space-sm)",
+  borderRadius: "var(--radius-control)",
+  transition: "border-color var(--dur-micro) var(--ease-out)",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  marginBlockEnd: "var(--space-2xs)",
+};
+
 export default function Contact() {
-  const headingRef = useReveal<HTMLHeadingElement>();
-  const contentRef = useReveal<HTMLDivElement>({ delay: 100 });
+  const contentRef = useReveal<HTMLDivElement>();
   const [formState, setFormState] = useState<{
     name: string;
     email: string;
@@ -52,7 +79,14 @@ export default function Contact() {
     industry: string;
     interest: Interest;
     message: string;
-  }>({ name: "", email: "", company: "", industry: "", interest: "consulting", message: "" });
+  }>({
+    name: "",
+    email: "",
+    company: "",
+    industry: "",
+    interest: "consulting",
+    message: "",
+  });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,270 +104,297 @@ export default function Contact() {
       });
 
       if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        const data = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
         throw new Error(data?.error ?? "Something went wrong. Please try again.");
       }
 
       setIsSubmitted(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setError(
+        err instanceof Error ? err.message : "Something went wrong. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <section id="contact" className="section-padding relative">
-      <SectionLabel>Let&apos;s talk</SectionLabel>
+    <section id="contact" className="section section--close">
+      <div
+        ref={contentRef}
+        className="reveal grid grid-cols-1 lg:grid-cols-12"
+        style={{ gap: "var(--space-2xl)" }}
+      >
+        <div className="lg:col-span-4">
+          <SectionHead
+            title="Tell us what the system needs to do"
+            lede="A paragraph about the problem is enough to start. We will reply with what we would try first."
+          />
 
-      <div className="max-w-4xl">
-        <h2
-          ref={headingRef}
-          className="reveal text-4xl md:text-6xl lg:text-[5rem] font-bold tracking-tight mb-12 leading-[1.05]"
-        >
-          Ready to build{" "}
-          <span className="text-accent">something extraordinary</span>?
-        </h2>
-
-        <div ref={contentRef} className="reveal grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-          {/* Contact details */}
-          <div className="lg:col-span-4 space-y-8">
-            <p className="text-muted text-lg leading-relaxed">
-              Whether you&apos;re exploring AI for the first time or scaling
-              existing capabilities, we&apos;d love to hear from you.
-            </p>
-
-            <div className="pt-4 space-y-6">
-              <div>
-                <span className="text-xs text-muted tracking-widest uppercase font-mono block mb-2">
-                  Email
-                </span>
-                <a href="mailto:hello@swotlabs.com" className="text-foreground hover:text-accent transition-colors" data-cursor-hover>
-                  hello@swotlabs.com
-                </a>
-              </div>
-              <div>
-                <span className="text-xs text-muted tracking-widest uppercase font-mono block mb-2">
-                  Location
-                </span>
-                <p className="text-foreground">Dublin, Ireland</p>
-              </div>
-              <div>
-                <span className="text-xs text-muted tracking-widest uppercase font-mono block mb-2">
-                  Focus
-                </span>
-                <p className="text-foreground">Enterprise AI & AGI</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Form container */}
-          <div className="lg:col-span-8">
-            {isSubmitted ? (
-              <div className="bg-surface/30 border border-border p-8 md:p-10 rounded-2xl text-center space-y-6">
-                <div className="w-16 h-16 bg-accent/15 text-accent rounded-full flex items-center justify-center mx-auto animate-pulse">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold tracking-tight">Message Received</h3>
-                <p className="text-muted leading-relaxed max-w-md mx-auto">
-                  Thank you for reaching out, <strong>{formState.name}</strong>. An AI solutions engineer from our Dublin team will get back to you shortly.
-                </p>
-                <button
-                  onClick={() => {
-                    setIsSubmitted(false);
-                    setError(null);
-                    setFormState({ name: "", email: "", company: "", industry: "", interest: "consulting", message: "" });
-                  }}
-                  className="px-6 py-2.5 border border-border rounded-full hover:border-accent text-sm transition-colors duration-300 cursor-pointer"
-                  data-cursor-hover
+          <dl style={{ marginBlockStart: "var(--space-xl)" }}>
+            {reach.map((row) => (
+              <div
+                key={row.key}
+                className="border-t border-rule"
+                style={{ paddingBlock: "var(--space-md)" }}
+              >
+                <dt className="label-meta">{row.key}</dt>
+                <dd
+                  className="text-ink text-sm"
+                  style={{ marginBlockStart: "var(--space-2xs)" }}
                 >
-                  Send another message
-                </button>
+                  {row.href ? (
+                    <a
+                      href={row.href}
+                      className="hover:text-accent"
+                      style={{
+                        transition: "color var(--dur-micro) var(--ease-out)",
+                      }}
+                    >
+                      {row.value}
+                    </a>
+                  ) : (
+                    row.value
+                  )}
+                </dd>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {/* Name */}
-                  <div className="relative group">
-                    <input
-                      type="text"
-                      required
-                      value={formState.name}
-                      onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                      className="w-full bg-surface/30 border border-border rounded-xl px-5 py-4 text-foreground placeholder-transparent focus:outline-none focus:border-accent transition-colors duration-300 peer"
-                      id="name"
-                      placeholder="Name"
-                    />
-                    <label
-                      htmlFor="name"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 px-2 text-muted text-base bg-transparent transition-all duration-300 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-accent peer-focus:bg-background peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-background"
-                    >
-                      Name
-                    </label>
-                  </div>
-                  {/* Email */}
-                  <div className="relative group">
-                    <input
-                      type="email"
-                      required
-                      value={formState.email}
-                      onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-                      className="w-full bg-surface/30 border border-border rounded-xl px-5 py-4 text-foreground placeholder-transparent focus:outline-none focus:border-accent transition-colors duration-300 peer"
-                      id="email"
-                      placeholder="Email"
-                    />
-                    <label
-                      htmlFor="email"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 px-2 text-muted text-base bg-transparent transition-all duration-300 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-accent peer-focus:bg-background peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-background"
-                    >
-                      Email address
-                    </label>
-                  </div>
+            ))}
+          </dl>
+        </div>
+
+        <div className="lg:col-span-7 lg:col-start-6">
+          {isSubmitted ? (
+            <div
+              className="border border-rule"
+              style={{
+                borderRadius: "var(--radius-panel)",
+                padding: "var(--space-xl)",
+              }}
+            >
+              <h3 className="text-md">Message sent</h3>
+              <p
+                className="text-muted text-sm"
+                style={{ maxWidth: "52ch", marginBlockStart: "var(--space-sm)" }}
+              >
+                It reached the team inbox. A person reads everything that lands
+                there and will reply to you directly.
+              </p>
+              <button
+                onClick={() => setIsSubmitted(false)}
+                className="border border-rule text-ink text-sm hover:border-accent hover:text-accent cursor-pointer"
+                style={{
+                  marginBlockStart: "var(--space-lg)",
+                  paddingInline: "var(--space-md)",
+                  paddingBlock: "var(--space-xs)",
+                  borderRadius: "var(--radius-control)",
+                  transition:
+                    "border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out)",
+                }}
+              >
+                Send another
+              </button>
+            </div>
+          ) : (
+            <form
+              onSubmit={handleSubmit}
+              className="grid grid-cols-1 sm:grid-cols-2"
+              style={{ gap: "var(--space-lg)" }}
+            >
+              <div>
+                <label htmlFor="name" className="label-meta" style={labelStyle}>
+                  Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  required
+                  autoComplete="name"
+                  value={formState.name}
+                  onChange={(e) =>
+                    setFormState({ ...formState, name: e.target.value })
+                  }
+                  className={fieldClass}
+                  style={fieldStyle}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="label-meta" style={labelStyle}>
+                  Work email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={formState.email}
+                  onChange={(e) =>
+                    setFormState({ ...formState, email: e.target.value })
+                  }
+                  className={fieldClass}
+                  style={fieldStyle}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="company"
+                  className="label-meta"
+                  style={labelStyle}
+                >
+                  Organisation
+                </label>
+                <input
+                  id="company"
+                  type="text"
+                  autoComplete="organization"
+                  value={formState.company}
+                  onChange={(e) =>
+                    setFormState({ ...formState, company: e.target.value })
+                  }
+                  className={fieldClass}
+                  style={fieldStyle}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="industry"
+                  className="label-meta"
+                  style={labelStyle}
+                >
+                  Sector
+                </label>
+                <select
+                  id="industry"
+                  required
+                  value={formState.industry}
+                  onChange={(e) =>
+                    setFormState({ ...formState, industry: e.target.value })
+                  }
+                  className={`${fieldClass} cursor-pointer`}
+                  style={fieldStyle}
+                >
+                  <option value="" disabled>
+                    Select a sector
+                  </option>
+                  {industries.map((industry) => (
+                    <option key={industry} value={industry}>
+                      {industry}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <fieldset className="sm:col-span-2">
+                <legend className="label-meta" style={labelStyle}>
+                  What it concerns
+                </legend>
+                <div
+                  className="flex flex-wrap"
+                  style={{ gap: "var(--space-xs)" }}
+                >
+                  {interestOptions.map((opt) => {
+                    const selected = formState.interest === opt.id;
+                    return (
+                      <label
+                        key={opt.id}
+                        className={`chip text-sm cursor-pointer border ${
+                          selected
+                            ? "border-accent text-accent"
+                            : "border-rule text-muted hover:text-ink"
+                        }`}
+                        style={{
+                          paddingInline: "var(--space-md)",
+                          paddingBlock: "var(--space-xs)",
+                          borderRadius: "var(--radius-control)",
+                          transition:
+                            "border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out)",
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="interest"
+                          value={opt.id}
+                          checked={selected}
+                          onChange={() =>
+                            setFormState({ ...formState, interest: opt.id })
+                          }
+                          // Zero-sized but left in normal flow: an absolutely
+                          // positioned radio makes the page jump on click.
+                          style={{
+                            width: 0,
+                            height: 0,
+                            opacity: 0,
+                            margin: 0,
+                            padding: 0,
+                            border: 0,
+                            appearance: "none",
+                          }}
+                        />
+                        {opt.label}
+                      </label>
+                    );
+                  })}
                 </div>
+              </fieldset>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {/* Company */}
-                  <div className="relative group">
-                    <input
-                      type="text"
-                      value={formState.company}
-                      onChange={(e) => setFormState({ ...formState, company: e.target.value })}
-                      className="w-full bg-surface/30 border border-border rounded-xl px-5 py-4 text-foreground placeholder-transparent focus:outline-none focus:border-accent transition-colors duration-300 peer"
-                      id="company"
-                      placeholder="Company"
-                    />
-                    <label
-                      htmlFor="company"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 px-2 text-muted text-base bg-transparent transition-all duration-300 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-accent peer-focus:bg-background peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-background"
-                    >
-                      Company
-                    </label>
-                  </div>
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="message"
+                  className="label-meta"
+                  style={labelStyle}
+                >
+                  The problem
+                </label>
+                <textarea
+                  id="message"
+                  required
+                  rows={5}
+                  value={formState.message}
+                  onChange={(e) =>
+                    setFormState({ ...formState, message: e.target.value })
+                  }
+                  className={`${fieldClass} resize-none`}
+                  style={fieldStyle}
+                />
+              </div>
 
-                  {/* Industry dropdown */}
-                  <div className="relative group">
-                    <select
-                      id="industry"
-                      value={formState.industry}
-                      onChange={(e) => setFormState({ ...formState, industry: e.target.value })}
-                      className={`w-full appearance-none bg-surface/30 border border-border rounded-xl px-5 py-4 pr-10 focus:outline-none focus:border-accent transition-colors duration-300 cursor-pointer ${
-                        formState.industry ? "text-foreground" : "text-muted"
-                      }`}
-                      data-cursor-hover
-                    >
-                      <option value="" disabled>
-                        Select your industry
-                      </option>
-                      {industries.map((ind) => (
-                        <option key={ind} value={ind} className="bg-surface text-foreground">
-                          {ind}
-                        </option>
-                      ))}
-                    </select>
-                    {/* Chevron */}
-                    <svg
-                      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      aria-hidden="true"
-                    >
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </div>
-                </div>
+              {/* The message slot is always present: an error appearing must not
+                  push the submit button down the page. */}
+              <p
+                role="alert"
+                aria-live="polite"
+                className="sm:col-span-2 text-sm"
+                style={{
+                  minHeight: "1lh",
+                  color: error ? "var(--color-danger)" : undefined,
+                }}
+              >
+                {error}
+              </p>
 
-                {/* Service/Interest selection */}
-                <div>
-                  <span
-                    id="interest-label"
-                    className="text-xs text-muted font-mono tracking-widest uppercase block mb-3"
-                  >
-                    Project Interest
-                  </span>
-                  <div
-                    role="radiogroup"
-                    aria-labelledby="interest-label"
-                    className="grid grid-cols-2 gap-3"
-                  >
-                    {interestOptions.map((opt) => {
-                      const selected = formState.interest === opt.id;
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={selected}
-                          onClick={() => setFormState({ ...formState, interest: opt.id })}
-                          className={`px-4 py-3 rounded-xl border text-xs font-medium tracking-wide transition-all duration-300 cursor-pointer ${
-                            selected
-                              ? "bg-accent/10 border-accent text-accent"
-                              : "border-border bg-surface/10 hover:border-accent/40 text-muted hover:text-foreground"
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Message */}
-                <div className="relative group">
-                  <textarea
-                    required
-                    rows={4}
-                    value={formState.message}
-                    onChange={(e) => setFormState({ ...formState, message: e.target.value })}
-                    className="w-full bg-surface/30 border border-border rounded-xl px-5 py-4 text-foreground placeholder-transparent focus:outline-none focus:border-accent transition-colors duration-300 peer resize-none"
-                    id="message"
-                    placeholder="Your message"
-                  />
-                  <label
-                    htmlFor="message"
-                    className="absolute left-3 top-4 px-2 text-muted text-base bg-transparent transition-all duration-300 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-accent peer-focus:bg-background peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-background"
-                  >
-                    Your message
-                  </label>
-                </div>
-
-                {error && (
-                  <p
-                    role="alert"
-                    className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3"
-                  >
-                    {error}
-                  </p>
-                )}
-
+              <div className="sm:col-span-2">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full px-8 py-4 bg-accent text-background rounded-xl text-sm font-medium tracking-wide hover:bg-accent-light transition-all duration-300 hover:shadow-[0_0_40px_var(--color-accent-border)] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
-                  data-cursor-hover
+                  className="whitespace-nowrap bg-accent text-accent-ink text-sm font-medium hover:bg-accent-light cursor-pointer disabled:cursor-not-allowed"
+                  style={{
+                    paddingInline: "var(--space-lg)",
+                    paddingBlock: "var(--space-sm)",
+                    borderRadius: "var(--radius-control)",
+                    transition: "background-color var(--dur-micro) var(--ease-out)",
+                  }}
                 >
-                  {isSubmitting ? (
-                    <span>Sending...</span>
-                  ) : (
-                    <>
-                      <span>Send Message</span>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                      </svg>
-                    </>
-                  )}
+                  {isSubmitting ? "Sending…" : "Send message"}
                 </button>
-              </form>
-            )}
-          </div>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </section>
   );
 }
-
